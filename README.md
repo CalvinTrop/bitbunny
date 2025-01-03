@@ -17,12 +17,12 @@ the repo. You'll live.
 
 ToDo: Finish this README, I'm tired and need a drink.
 
-Hardware:
+###Hardware:
   - Raspberry Pi Zero W2 (or equivalent, this is the only hardware tested on so far)
   - 2xSSD1306 based 64x128px OLED displays (I used the Hosyond ones [here](https://www.amazon.com/dp/B0BFD4X6YV)
   - Basic soldering skills
 
-Software requirements (as far as I can recall... :/):
+###Software requirements (as far as I can recall... :/):
   - i2ctools
   - python3-full
   - python3-smbus
@@ -32,7 +32,7 @@ Software requirements (as far as I can recall... :/):
   - Adafruit-circuitpython-ssd1306 lib
   - Adafruit-Blinka lib
 
-Pinouts:
+###Pinouts:
   - OLED Displays:
       - Connect all headers 1:1 on both displays to each other
       - GND to Pin 6
