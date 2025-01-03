@@ -113,11 +113,13 @@ while True:
     
     cmd1 = "hostname"
     cmd2 = "hostname -I | cut -d' ' -f1"
-    part1 = subprocess.check_output(cmd1, shell=True).decode("utf-8")
-    part2 = subprocess.check_output(cmd2, shell=True).decode("utf-8")
+    line1part1 = subprocess.check_output(cmd1, shell=True).decode("utf-8")
+    line1part2 = subprocess.check_output(cmd2, shell=True).decode("utf-8")
     
-    cmd = "top -bn1 | grep load | awk '{printf \"Load: %.2f\", $(NF-2)}'"
-    line2 = subprocess.check_output(cmd, shell=True).decode("utf-8")
+    cmd1 = "top -bn1 | grep load | awk '{printf \"Load: %.2f\", $(NF-2)}'"
+    cmd2 = "cat /sys/class/thermal/thermal_zone*/temp | awk 'length($0) ==5 {print substr($0,1,2) \".\" substr($0,3,1) \"°C\"}'"
+    line2part1 = subprocess.check_output(cmd1, shell=True).decode("utf-8")
+    line2part2 = subprocess.check_output(cmd2, shell=True).decode("utf-8")
     
     cmd = "free -m | awk 'NR==2{printf \"Memory: %.0f%%\", $3*100/$2}'"  
     line3 = subprocess.check_output(cmd, shell=True).decode("utf-8")
@@ -129,12 +131,13 @@ while True:
     line5 = subprocess.check_output(cmd, shell=True).decode("utf-8")
 
     # Write four lines of text. 
-    draw2.text((x, top + 0),  part1, font=font, fill=255) 
-    draw2.text((x + 50, top + 0),  part2, font=font, fill=255) 
-    draw2.text((x, top + 12),  line2, font=font, fill=255) 
-    draw2.text((x, top + 24), line3, font=font, fill=255) 
-    draw2.text((x, top + 36), line4, font=font, fill=255)
-    draw2.text((x, top + 48), line5, font=font, fill=255)
+    draw2.text((x, top + 0),  line1part1, font=font, fill=255) # hostname
+    draw2.text((x + 50, top + 0),  line1part2, font=font, fill=255) # IP address
+    draw2.text((x, top + 12),  line2part1, font=font, fill=255) # load
+    draw2.text((x + 74, top + 12), line2part2, font=font, fill=255) # sys temp
+    draw2.text((x, top + 24), line3, font=font, fill=255) # Memory
+    draw2.text((x, top + 36), line4, font=font, fill=255) # Disk
+    draw2.text((x, top + 48), line5, font=font, fill=255) # local time
 
     # Display image. 
     oled2.image(image2)
