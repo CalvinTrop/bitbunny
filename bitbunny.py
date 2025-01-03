@@ -22,14 +22,14 @@ import adafruit_ssd1306
 imagePath = "/home/bitbunny/bitbunny/images/"
 
 # BitBunny specific definitions:
-faceDetermined = imagePath+"Bunz_Determined_64x64.bmp"
-faceHappy = imagePath+"Bunz_Happy_64x64.bmp"
-faceSad = imagePath+"Bunz_Determined_64x64.bmp"
-facePuzzled = imagePath+"Bunz_Puzzled_64x64.bmp"
-faceSleepy = imagePath+"Bunz_Sleepy_64x64.bmp"
-faceDead = imagePath+"Bunz_Dead_64x64.bmp"
-faceIdleLeft = imagePath+"Bunz_Idle_Left_64x64.bmp"
-faceIdleRight = imagePath+"Bunz_Idle_Right_64x64.bmp"
+faceDetermined = "Bunz_Determined_64x64.bmp"
+faceHappy = "Bunz_Happy_64x64.bmp"
+faceSad = "Bunz_Determined_64x64.bmp"
+facePuzzled = "Bunz_Puzzled_64x64.bmp"
+faceSleepy = "Bunz_Sleepy_64x64.bmp"
+faceDead = "Bunz_Dead_64x64.bmp"
+faceIdleLeft = "Bunz_Idle_Left_64x64.bmp"
+faceIdleRight = "Bunz_Idle_Right_64x64.bmp"
 
 face = faceDetermined # startup default face
 
@@ -76,7 +76,7 @@ font = ImageFont.load_default()
 while True:
 
     # Draw bunnyface splash screen
-    currentFace = Image.open(face)
+    currentFace = Image.open(imagePath+face)
     image1.paste(currentFace, (0,0))
 
     # Add stats screen overlay to left screen
