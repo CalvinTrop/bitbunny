@@ -26,3 +26,5 @@ Requirements (as far as I can recall... :/):
   - [pillow](https://pillow.readthedocs.io/en/stable/)
   - Adafruit-circuitpython-ssd1306 lib
   - Adafruit-Blinka lib
+
+The service related files are here as backups and because I'm very lazy.
