@@ -1,0 +1,12 @@
+[Unit]
+Description=BitBunny Pocket Companion
+After=multi-user.target
+
+[Service]
+Type=simple
+User=bitbunny
+Group=bitbunny
+ExecStart=/home/bitbunny/bitbunny/run.sh
+
+[Install]
+WantedBy=multi-user.target
