@@ -16,3 +16,13 @@ very messy way on the command line, so there may be a lot of questionable code p
 the repo. You'll live.
 
 ToDo: Finish this README, I'm tired and need a drink.
+
+Requirements (as far as I can recall... :/):
+  - i2ctools
+  - python3-full
+  - python3-smbus
+  - python3-setuptools
+  - pip
+  - [pillow](https://pillow.readthedocs.io/en/stable/)
+  - Adafruit-circuitpython-ssd1306 lib
+  - Adafruit-Blinka lib
