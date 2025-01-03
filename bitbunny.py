@@ -27,10 +27,11 @@ faceDead = "Bunz_Dead_64x64.bmp"
 faceIdleLeft = "Bunz_Idle_Left_64x64.bmp"
 faceIdleRight = "Bunz_Idle_Right_64x64.bmp"
 
-face = faceDetermined # startup default face
-
-# Random face code for funzies
-faceArray = [faceDetermined,faceIdleLeft,faceIdleRight,facePuzzled,faceSleepy,faceDead,faceHappy,faceSad]
+lastFace = faceDetermined # startup default face
+face = lastFace # Look at me initializing my vars!
+faceSpeedSetting = 2 # How long idle faces get held. Must be an int, default is 2
+faceSpeed = faceSpeedSetting # I really need to make this loop a function
+faceArray = [lastFace,faceIdleLeft,faceIdleRight] # Contains the array for idle animations
 
 statsOffset = 75 #text offset to keep his lil face clear of text
 statsTitle = "-=Stats=-"
@@ -71,10 +72,6 @@ font = ImageFont.load_default()
 # Test loop:
 while True:
 
-    # Draw bunnyface splash screen
-    currentFace = Image.open(imagePath+face)
-    image1.paste(currentFace, (0,0))
-
     # Add stats screen overlay to left screen
     draw1.text((statsOffset, 0), statsTitle, font=font, fill=255, fontmode='1')
     draw1.line((65,12,128,12), fill=255, width=1)
@@ -86,17 +83,23 @@ while True:
     draw1.text((65,52), "B:100", fill=255) # Battery
     draw1.text((100,52), "W: Y", fill=255) # Wifi Connected Y/N
 
+    # Idle DoomBun face:
+    if faceSpeed == 0:
+        faceSpeed = faceSpeedSetting
+        idleFace = random.choices(faceArray, weights=[8,2,2], k=1)
+        if idleFace[0] != "lastFace":
+            face = idleFace[0]
+        else:
+            face = lastFace
+    else:
+        faceSpeed = faceSpeed - 1
+
+    # Draw the cutie lil' bun face
+    image1.paste(Image.open(imagePath+face), (0,0))
+
     # Display image
     oled1.image(image1)
     oled1.show()
-
-    # Random face cycle for testing:
-    # face = faceArray[random.randint(0,7)]
-
-    # Idle DoomBun face:
-    faceArray = [faceDetermined,faceIdleLeft,faceIdleRight]
-    idleFace = random.choices(faceArray, weights=[8,2,2], k=1)
-    face = idleFace[0]
 
     # Test 2nd Screen
     #First define some constants to allow easy resizing of shapes.
@@ -105,9 +108,10 @@ while True:
     bottom = HEIGHT - padding
     #Move left to right keeping track of the current x position for drawing shapes.
     x = 0
-
-    #show hostname/stats
     
+    #--------------------
+    # show hostname/stats
+
     # Draw a box to clear the image
     draw2.rectangle((0, 0, WIDTH, HEIGHT), outline=0, fill=0)
     
@@ -130,7 +134,7 @@ while True:
     cmd = 'date +%T'
     line5 = subprocess.check_output(cmd, shell=True).decode("utf-8")
 
-    # Write four lines of text. 
+    # Write out all our stats on the 2nd canvas 
     draw2.text((x, top + 0),  line1part1, font=font, fill=255) # hostname
     draw2.text((x + 50, top + 0),  line1part2, font=font, fill=255) # IP address
     draw2.text((x, top + 12),  line2part1, font=font, fill=255) # load
@@ -142,6 +146,7 @@ while True:
     # Display image. 
     oled2.image(image2)
     oled2.show()  
+    #----------------------
 
-    time.sleep(1)
+    time.sleep(0.1)
 
