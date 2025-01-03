@@ -34,7 +34,7 @@ Software requirements (as far as I can recall... :/):
 
 Pinouts:
   - OLED Displays:
-      - Connect all headers 1:1 on both displays to eachother
+      - Connect all headers 1:1 on both displays to each other
       - GND to Pin 6
       - VCC to Pin 1 (Use the 3.3V from the RPi to drive the displays, it's less for them to manage)
       - SDA to Pin 3
