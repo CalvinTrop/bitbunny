@@ -17,7 +17,12 @@ the repo. You'll live.
 
 ToDo: Finish this README, I'm tired and need a drink.
 
-Requirements (as far as I can recall... :/):
+Hardware:
+  - Raspberry Pi Zero W2 (or equivalent, this is the only hardware tested on so far)
+  - 2xSSD1306 based 64x128px OLED displays (I used the Hosyond ones [here](https://www.amazon.com/dp/B0BFD4X6YV)
+  - Basic soldering skills
+
+Software requirements (as far as I can recall... :/):
   - i2ctools
   - python3-full
   - python3-smbus
@@ -26,5 +31,13 @@ Requirements (as far as I can recall... :/):
   - [pillow](https://pillow.readthedocs.io/en/stable/)
   - Adafruit-circuitpython-ssd1306 lib
   - Adafruit-Blinka lib
+
+Pinouts:
+  - OLED Displays:
+      - Connect all headers 1:1 on both displays to eachother
+      - GND to Pin 6
+      - VCC to Pin 1 (Use the 3.3V from the RPi to drive the displays, it's less for them to manage)
+      - SDA to Pin 3
+      - SCL to Pin 5
 
 The service related files and .env are here as backups and because I'm very lazy.
