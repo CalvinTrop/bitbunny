@@ -1,4 +1,5 @@
 # bitBunny - A DIY Cyberpunk Style Digital Companion
+![bitBunny logo image](https://github.com/CalvinTrop/bitbunny/blob/8e440d3d04aa930831f4eb58e3ca45a6ea362b54/CyberBun.png)
 ----------------------------------------------------
 This project was inspired by several conversations/projects @ the [Cyberdeck Cafe Discord](https://discord.gg/EnC4padt7z)
 Thanks all!
