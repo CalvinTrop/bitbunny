@@ -4,11 +4,7 @@
 # Shit code by Jeff Baars, project implemented 31DEC2024
 # using AdaFruit's Blinka library
 #
-# Use this code for whatever you want, I'm not a cop...
-#
-# v0.3 - Refactoring face variable to change dynamically
-#      - Added some random idle animations to test, ala DoomGuy
-#      - Added current status area to stats screen 
+# Use this code for whatever you want, I'm not a cop... 
 
 import math
 import time
@@ -120,7 +116,7 @@ while True:
     part1 = subprocess.check_output(cmd1, shell=True).decode("utf-8")
     part2 = subprocess.check_output(cmd2, shell=True).decode("utf-8")
     
-    cmd = "top -bn1 | grep load | awk '{printf \"Load: %.2f\", $(NF-2)}'" 
+    cmd = "top -bn1 | grep load | awk '{printf \"Load: %.2f\", $(NF-2)}'"
     line2 = subprocess.check_output(cmd, shell=True).decode("utf-8")
     
     cmd = "free -m | awk 'NR==2{printf \"Memory: %.0f%%\", $3*100/$2}'"  
