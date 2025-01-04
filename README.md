@@ -41,3 +41,6 @@ ToDo: Finish this README, I'm tired and need a drink.
       - SCL to Pin 5
 
 The service related files and .env are here as backups and because I'm very lazy.
+
+Random WIP photos:
+![Circuits and Stuff](https://imgur.com/a/5KrSqIK)
