@@ -43,4 +43,5 @@ ToDo: Finish this README, I'm tired and need a drink.
 The service related files and .env are here as backups and because I'm very lazy.
 
 Random WIP photos:
-![Circuits and Stuff](https://imgur.com/a/5KrSqIK)
+
+![Circuits and Stuff](https://i.ibb.co/ngcHpcN/bitbunny-WIP-3-JAN25.png)
