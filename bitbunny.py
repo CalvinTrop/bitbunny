@@ -23,6 +23,7 @@ faceHappy = "Bunz_Happy_64x64.bmp"
 faceSad = "Bunz_Determined_64x64.bmp"
 facePuzzled = "Bunz_Puzzled_64x64.bmp"
 faceSleepy = "Bunz_Sleepy_64x64.bmp"
+faceSuprised = "Bunz_Suprised_64x64.bmp"
 faceDead = "Bunz_Dead_64x64.bmp"
 faceIdleLeft = "Bunz_Idle_Left_64x64.bmp"
 faceIdleRight = "Bunz_Idle_Right_64x64.bmp"
@@ -32,6 +33,8 @@ face = lastFace # Look at me initializing my vars!
 faceSpeedSetting = 2 # How long idle faces get held. Must be an int, default is 2
 faceSpeed = faceSpeedSetting # I really need to make this loop a function
 faceArray = [lastFace,faceIdleLeft,faceIdleRight] # Contains the array for idle animations
+faceFlag = False # If True, skips idle animations
+loadFlag = False # Are we over the load threshold
 
 statsOffset = 75 #text offset to keep his lil face clear of text
 statsTitle = "-=Stats=-"
@@ -69,9 +72,32 @@ draw2 = ImageDraw.Draw(image2)
 # Load default font.
 font = ImageFont.load_default()
 
-# Test loop:
-while True:
+def idleFace(lastFace): # Idle DoomBun face:
+    global faceSpeed
+    global face
 
+    if faceSpeed == 0:
+        faceSpeed = faceSpeedSetting
+        idleFace = random.choices(faceArray, weights=[8,2,2], k=1)
+        if idleFace[0] != "lastFace":
+            face = idleFace[0]
+        else:
+            face = lastFace
+    else:
+        faceSpeed = faceSpeed - 1
+    return face
+
+def checkLoad():
+    cmd = "cat /proc/loadavg | awk '{print $1}'"
+    load = subprocess.check_output(cmd, shell=True).decode("utf-8")
+    x = float(load)
+    print(x)
+    if x > 0.8: #set load limit here
+        return True
+    else:
+        return False
+
+def drawScreen1(): # Put all the info on the left screen
     # Add stats screen overlay to left screen
     draw1.text((statsOffset, 0), statsTitle, font=font, fill=255, fontmode='1')
     draw1.line((65,12,128,12), fill=255, width=1)
@@ -82,17 +108,14 @@ while True:
     draw1.text((65,38), "Foraging", fill=255) # Current Activity
     draw1.text((65,52), "B:100", fill=255) # Battery
     draw1.text((100,52), "W: Y", fill=255) # Wifi Connected Y/N
+  
+    idleFace(lastFace)
 
-    # Idle DoomBun face:
-    if faceSpeed == 0:
-        faceSpeed = faceSpeedSetting
-        idleFace = random.choices(faceArray, weights=[8,2,2], k=1)
-        if idleFace[0] != "lastFace":
-            face = idleFace[0]
-        else:
-            face = lastFace
+    loadFlag = checkLoad()
+    if loadFlag == True:
+        lastFace = faceSuprised
     else:
-        faceSpeed = faceSpeed - 1
+        face = lastFace
 
     # Draw the cutie lil' bun face
     image1.paste(Image.open(imagePath+face), (0,0))
@@ -101,12 +124,13 @@ while True:
     oled1.image(image1)
     oled1.show()
 
-    # Test 2nd Screen
-    #First define some constants to allow easy resizing of shapes.
+def drawScreen2(): # Put all the info on the right screen
+    # Draw 2nd Screen
+    # First define some constants to allow easy resizing of shapes.
     padding = -2
     top = padding
     bottom = HEIGHT - padding
-    #Move left to right keeping track of the current x position for drawing shapes.
+    # Move left to right keeping track of the current x position for drawing shapes.
     x = 0
     
     #--------------------
@@ -145,8 +169,13 @@ while True:
 
     # Display image. 
     oled2.image(image2)
-    oled2.show()  
-    #----------------------
+    oled2.show() 
 
-    time.sleep(0.1)
+# main loop
+while True:
+
+    drawScreen1()
+    drawScreen2()
+
+    time.sleep(0.1) # Main loop rest timer until I figure out async
 
