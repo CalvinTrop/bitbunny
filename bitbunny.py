@@ -14,6 +14,7 @@ import digitalio
 import random
 from PIL import Image, ImageDraw, ImageFont
 import adafruit_ssd1306
+import adafruit_ina260
 
 imagePath = "/home/bitbunny/bitbunny/images/"
 
@@ -33,6 +34,10 @@ faceSpeedSetting = 2 # How long idle faces get held. Must be an int, default is 
 faceSpeed = faceSpeedSetting # I really need to make this loop a function
 faceArray = [lastFace,faceIdleLeft,faceIdleRight] # Contains the array for idle animations
 
+batt = 0
+batt_remaining = 0
+batt_delay = 1
+
 statsOffset = 75 #text offset to keep his lil face clear of text
 statsTitle = "-=Stats=-"
 
@@ -48,8 +53,10 @@ BORDER = 5
 # Use for I2C.
 i2c = board.I2C()  # uses board.SCL and board.SDA
 oled1 = adafruit_ssd1306.SSD1306_I2C(WIDTH, HEIGHT, i2c, addr=0x3C, reset=oled_reset)
-#2nd Display
+# 2nd Display
 oled2 = adafruit_ssd1306.SSD1306_I2C(WIDTH, HEIGHT, i2c, addr=0x3D, reset=oled_reset)
+# INA260 power monitoring PCB
+ina260 = adafruit_ina260.INA260(i2c)
 
 # Clear display
 oled1.fill(0)
@@ -72,6 +79,16 @@ font = ImageFont.load_default()
 # Test loop:
 while True:
 
+    # Get battery voltage %
+    batt_delay = batt_delay - 1
+    if batt_delay == 0:
+        batt = (ina260.voltage)
+        batt_remaining = (batt - 3.2) / (4.2-3.2) * 100
+        batt_delay = 100
+    
+    # Draw a box to clear the image
+    draw1.rectangle((0, 0, WIDTH, HEIGHT), outline=0, fill=0)
+
     # Add stats screen overlay to left screen
     draw1.text((statsOffset, 0), statsTitle, font=font, fill=255, fontmode='1')
     draw1.line((65,12,128,12), fill=255, width=1)
@@ -80,7 +97,7 @@ while True:
     draw1.text((65,26), "A: 5", fill=255) # Attack stat
     draw1.text((100,26), "D: 7", fill=255) # Defense stat
     draw1.text((65,38), "Foraging", fill=255) # Current Activity
-    draw1.text((65,52), "B:100", fill=255) # Battery
+    draw1.text((65,52), f"B: {int(batt_remaining)}%", fill=255) # Battery
     draw1.text((100,52), "W: Y", fill=255) # Wifi Connected Y/N
 
     # Idle DoomBun face:
