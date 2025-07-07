@@ -11,10 +11,12 @@ import time
 import subprocess
 import board
 import digitalio
+import busio
 import random
 from PIL import Image, ImageDraw, ImageFont
 import adafruit_ssd1306
 import adafruit_ina260
+from adafruit_pm25.i2c import PM25_I2C
 
 imagePath = "/home/bitbunny/bitbunny/images/"
 
@@ -60,6 +62,11 @@ oled2 = adafruit_ssd1306.SSD1306_I2C(WIDTH, HEIGHT, i2c, addr=0x3D, reset=oled_r
 # INA260 power monitoring PCB
 ina260 = adafruit_ina260.INA260(i2c)
 
+# For PM2.5 module, create library object, use 'slow' 100KHz frequency!
+PM_i2c = busio.I2C(board.SCL, board.SDA, frequency=100000)
+# Connect to a PM2.5 sensor over I2C
+pm25 = PM25_I2C(PM_i2c)
+
 # Clear display
 oled1.fill(0)
 oled1.show()
@@ -78,7 +85,93 @@ draw2 = ImageDraw.Draw(image2)
 # Load default font.
 font = ImageFont.load_default()
 
-# Test loop:
+#---------------------------------------------------------------------------------------
+# Mode Definitions
+#---------------------------------------------------------------------------------------
+def mode_stats(): # show hostname/stats
+
+    # Draw a box to clear the image
+    draw2.rectangle((0, 0, WIDTH, HEIGHT), outline=0, fill=0)
+    
+    cmd1 = "hostname"
+    cmd2 = "hostname -I | cut -d' ' -f1"
+    line1part1 = subprocess.check_output(cmd1, shell=True).decode("utf-8")
+    line1part2 = subprocess.check_output(cmd2, shell=True).decode("utf-8")
+    
+    cmd1 = "top -bn1 | grep load | awk '{printf \"Load: %.2f\", $(NF-2)}'"
+    cmd2 = "cat /sys/class/thermal/thermal_zone*/temp | awk 'length($0) ==5 {print substr($0,1,2) \".\" substr($0,3,1) \"°C\"}'"
+    line2part1 = subprocess.check_output(cmd1, shell=True).decode("utf-8")
+    line2part2 = subprocess.check_output(cmd2, shell=True).decode("utf-8")
+    
+    cmd = "free -m | awk 'NR==2{printf \"Memory: %.0f%%\", $3*100/$2}'"  
+    line3 = subprocess.check_output(cmd, shell=True).decode("utf-8")
+    
+    cmd = 'df -h | awk \'$NF=="/"{printf "Disk: %s", $5}\'' 
+    line4 = subprocess.check_output(cmd, shell=True).decode("utf-8")
+
+    cmd = 'date +%T'
+    line5 = subprocess.check_output(cmd, shell=True).decode("utf-8")
+
+    # Write out all our stats on the 2nd canvas 
+    draw2.text((x, top + 0),  line1part1, font=font, fill=255) # hostname
+    draw2.text((x + 50, top + 0),  line1part2, font=font, fill=255) # IP address
+    draw2.text((x, top + 12),  line2part1, font=font, fill=255) # load
+    draw2.text((x + 74, top + 12), line2part2, font=font, fill=255) # sys temp
+    draw2.text((x, top + 24), line3, font=font, fill=255) # Memory
+    draw2.text((x, top + 36), line4, font=font, fill=255) # Disk
+    draw2.text((x, top + 48), line5, font=font, fill=255) # local time
+
+    # Display image. 
+    oled2.image(image2)
+    oled2.show()
+
+def mode_airquality(): # Display air quality stats from PMSA003I module
+    # Draw a box to clear the image
+    draw2.rectangle((0, 0, WIDTH, HEIGHT), outline=0, fill=0)
+    
+    aqdata = pm25.read()
+    pm10data = aqdata["pm10 standard"]
+    pm25data = aqdata["pm25 standard"]
+    pm100data = aqdata["pm100 standard"]
+
+    pm03um = aqdata["particles 03um"]
+    pm05um = aqdata["particles 05um"]
+    pm10um = aqdata["particles 10um"]
+    pm25um = aqdata["particles 25um"]
+    pm50um = aqdata["particles 50um"]
+    pm100um = aqdata["particles 100um"]
+
+    draw2.text((x, top +0), "Particles > X per 0.1L air:", font=font, fill=255) # header
+    draw2.text((x,top + 9), f"0.3um = {pm03um}", fill=255)
+    draw2.text((x,top + 21), f"0.5um = {pm05um}", fill=255)
+    draw2.text((x,top + 33), f"1.0um = {pm10um}", fill=255)
+    draw2.text((x + 65,top + 9), f"2.5um = {pm25um}", fill=255)
+    draw2.text((x + 65,top + 21), f"5.0um = {pm50um}", fill=255)
+    draw2.text((x + 65,top + 33), f"10um = {pm100um}", fill=255)
+    draw2.text((x,top + 45), f"AQI1.0 = {pm10data}", fill=255)
+    draw2.text((x + 65,top + 45), f"AQI2.5 = {pm25data}", fill=255)
+
+    if pm25data > 300:
+        draw2.text((x,top + 54), "               -=DANGER=-", fill=255)
+    else:
+        if pm25data > 200:
+            draw2.text((x,top + 54), "       -=Very Unhealthy=-", fill=255)
+        else:
+            if pm25data > 100:
+                draw2.text((x,top + 54), "             -=Unhealthy=-", fill=255)
+            else:
+                if pm25data > 50:
+                    draw2.text((x,top + 54), "              -=Moderate=-", fill=255)
+                else:
+                        draw2.text((x,top + 54), "                   -=Good=-", fill=255)
+
+    # Display image. 
+    oled2.image(image2)
+    oled2.show()
+
+#---------------------------------------------------------------------------------------
+
+# Main loop:
 while True:
 
     # Get battery voltage %
@@ -121,51 +214,15 @@ while True:
     oled1.show()
 
     # Test 2nd Screen
-    #First define some constants to allow easy resizing of shapes.
+    # First define some constants to allow easy resizing of shapes.
     padding = -2
     top = padding
     bottom = HEIGHT - padding
-    #Move left to right keeping track of the current x position for drawing shapes.
+    # Move left to right keeping track of the current x position for drawing shapes
     x = 0
     
-    #--------------------
-    # show hostname/stats
-
-    # Draw a box to clear the image
-    draw2.rectangle((0, 0, WIDTH, HEIGHT), outline=0, fill=0)
-    
-    cmd1 = "hostname"
-    cmd2 = "hostname -I | cut -d' ' -f1"
-    line1part1 = subprocess.check_output(cmd1, shell=True).decode("utf-8")
-    line1part2 = subprocess.check_output(cmd2, shell=True).decode("utf-8")
-    
-    cmd1 = "top -bn1 | grep load | awk '{printf \"Load: %.2f\", $(NF-2)}'"
-    cmd2 = "cat /sys/class/thermal/thermal_zone*/temp | awk 'length($0) ==5 {print substr($0,1,2) \".\" substr($0,3,1) \"°C\"}'"
-    line2part1 = subprocess.check_output(cmd1, shell=True).decode("utf-8")
-    line2part2 = subprocess.check_output(cmd2, shell=True).decode("utf-8")
-    
-    cmd = "free -m | awk 'NR==2{printf \"Memory: %.0f%%\", $3*100/$2}'"  
-    line3 = subprocess.check_output(cmd, shell=True).decode("utf-8")
-    
-    cmd = 'df -h | awk \'$NF=="/"{printf "Disk: %s", $5}\'' 
-    line4 = subprocess.check_output(cmd, shell=True).decode("utf-8")
-
-    cmd = 'date +%T'
-    line5 = subprocess.check_output(cmd, shell=True).decode("utf-8")
-
-    # Write out all our stats on the 2nd canvas 
-    draw2.text((x, top + 0),  line1part1, font=font, fill=255) # hostname
-    draw2.text((x + 50, top + 0),  line1part2, font=font, fill=255) # IP address
-    draw2.text((x, top + 12),  line2part1, font=font, fill=255) # load
-    draw2.text((x + 74, top + 12), line2part2, font=font, fill=255) # sys temp
-    draw2.text((x, top + 24), line3, font=font, fill=255) # Memory
-    draw2.text((x, top + 36), line4, font=font, fill=255) # Disk
-    draw2.text((x, top + 48), line5, font=font, fill=255) # local time
-
-    # Display image. 
-    oled2.image(image2)
-    oled2.show()  
-    #----------------------
+    # Draw 2nd Screen based on mode:
+    mode_airquality()
 
     time.sleep(0.1)
 
