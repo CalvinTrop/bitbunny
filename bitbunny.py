@@ -37,6 +37,8 @@ faceArray = [lastFace,faceIdleLeft,faceIdleRight] # Contains the array for idle 
 batt = 0
 batt_remaining = 0
 batt_delay = 1
+min_voltage = 3.2
+max_voltage = 4.05
 
 statsOffset = 75 #text offset to keep his lil face clear of text
 statsTitle = "-=Stats=-"
@@ -83,7 +85,7 @@ while True:
     batt_delay = batt_delay - 1
     if batt_delay == 0:
         batt = (ina260.voltage)
-        batt_remaining = (batt - 3.2) / (4.2-3.2) * 100
+        batt_remaining = (batt - min_voltage) / (max_voltage-min_voltage) * 100
         batt_delay = 100
     
     # Draw a box to clear the image
