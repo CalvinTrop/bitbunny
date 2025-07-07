@@ -30,6 +30,7 @@ ToDo: Finish this README, I'm tired and need a drink.
   - pip
   - [pillow](https://pillow.readthedocs.io/en/stable/)
   - Adafruit-circuitpython-ssd1306 lib
+  - Adafruit-ina-260 lib
   - Adafruit-Blinka lib
 
 ### Pinouts:
@@ -45,3 +46,4 @@ The service related files and .env are here as backups and because I'm very lazy
 Random WIP photos:
 
 ![Circuits and Stuff](https://i.ibb.co/ngcHpcN/bitbunny-WIP-3-JAN25.png)
+![WIP Housing while I test](https://i.ibb.co/Ldzm3pR0/bbWIP.jpg)
