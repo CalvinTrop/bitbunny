@@ -37,6 +37,8 @@ faceArray = [lastFace,faceIdleLeft,faceIdleRight] # Contains the array for idle 
 batt = 0
 batt_remaining = 0
 batt_delay = 1
+min_voltage = 3.2
+max_voltage = 4.05
 
 statsOffset = 75 #text offset to keep his lil face clear of text
 statsTitle = "-=Stats=-"
@@ -76,14 +78,55 @@ draw2 = ImageDraw.Draw(image2)
 # Load default font.
 font = ImageFont.load_default()
 
-# Test loop:
+#---------------------------------------------------------------------------------------
+# Mode Definitions
+#---------------------------------------------------------------------------------------
+def mode_stats(): # show hostname/stats
+
+    # Draw a box to clear the image
+    draw2.rectangle((0, 0, WIDTH, HEIGHT), outline=0, fill=0)
+    
+    cmd1 = "hostname"
+    cmd2 = "hostname -I | cut -d' ' -f1"
+    line1part1 = subprocess.check_output(cmd1, shell=True).decode("utf-8")
+    line1part2 = subprocess.check_output(cmd2, shell=True).decode("utf-8")
+    
+    cmd1 = "top -bn1 | grep load | awk '{printf \"Load: %.2f\", $(NF-2)}'"
+    cmd2 = "cat /sys/class/thermal/thermal_zone*/temp | awk 'length($0) ==5 {print substr($0,1,2) \".\" substr($0,3,1) \"°C\"}'"
+    line2part1 = subprocess.check_output(cmd1, shell=True).decode("utf-8")
+    line2part2 = subprocess.check_output(cmd2, shell=True).decode("utf-8")
+    
+    cmd = "free -m | awk 'NR==2{printf \"Memory: %.0f%%\", $3*100/$2}'"  
+    line3 = subprocess.check_output(cmd, shell=True).decode("utf-8")
+    
+    cmd = 'df -h | awk \'$NF=="/"{printf "Disk: %s", $5}\'' 
+    line4 = subprocess.check_output(cmd, shell=True).decode("utf-8")
+
+    cmd = 'date +%T'
+    line5 = subprocess.check_output(cmd, shell=True).decode("utf-8")
+
+    # Write out all our stats on the 2nd canvas 
+    draw2.text((x, top + 0),  line1part1, font=font, fill=255) # hostname
+    draw2.text((x + 50, top + 0),  line1part2, font=font, fill=255) # IP address
+    draw2.text((x, top + 12),  line2part1, font=font, fill=255) # load
+    draw2.text((x + 74, top + 12), line2part2, font=font, fill=255) # sys temp
+    draw2.text((x, top + 24), line3, font=font, fill=255) # Memory
+    draw2.text((x, top + 36), line4, font=font, fill=255) # Disk
+    draw2.text((x, top + 48), line5, font=font, fill=255) # local time
+
+    # Display image. 
+    oled2.image(image2)
+    oled2.show()  
+#---------------------------------------------------------------------------------------
+
+# Main loop:
 while True:
 
     # Get battery voltage %
     batt_delay = batt_delay - 1
     if batt_delay == 0:
         batt = (ina260.voltage)
-        batt_remaining = (batt - 3.2) / (4.2-3.2) * 100
+        batt_remaining = (batt - min_voltage) / (max_voltage-min_voltage) * 100
         batt_delay = 100
     
     # Draw a box to clear the image
@@ -126,44 +169,7 @@ while True:
     #Move left to right keeping track of the current x position for drawing shapes.
     x = 0
     
-    #--------------------
-    # show hostname/stats
-
-    # Draw a box to clear the image
-    draw2.rectangle((0, 0, WIDTH, HEIGHT), outline=0, fill=0)
-    
-    cmd1 = "hostname"
-    cmd2 = "hostname -I | cut -d' ' -f1"
-    line1part1 = subprocess.check_output(cmd1, shell=True).decode("utf-8")
-    line1part2 = subprocess.check_output(cmd2, shell=True).decode("utf-8")
-    
-    cmd1 = "top -bn1 | grep load | awk '{printf \"Load: %.2f\", $(NF-2)}'"
-    cmd2 = "cat /sys/class/thermal/thermal_zone*/temp | awk 'length($0) ==5 {print substr($0,1,2) \".\" substr($0,3,1) \"°C\"}'"
-    line2part1 = subprocess.check_output(cmd1, shell=True).decode("utf-8")
-    line2part2 = subprocess.check_output(cmd2, shell=True).decode("utf-8")
-    
-    cmd = "free -m | awk 'NR==2{printf \"Memory: %.0f%%\", $3*100/$2}'"  
-    line3 = subprocess.check_output(cmd, shell=True).decode("utf-8")
-    
-    cmd = 'df -h | awk \'$NF=="/"{printf "Disk: %s", $5}\'' 
-    line4 = subprocess.check_output(cmd, shell=True).decode("utf-8")
-
-    cmd = 'date +%T'
-    line5 = subprocess.check_output(cmd, shell=True).decode("utf-8")
-
-    # Write out all our stats on the 2nd canvas 
-    draw2.text((x, top + 0),  line1part1, font=font, fill=255) # hostname
-    draw2.text((x + 50, top + 0),  line1part2, font=font, fill=255) # IP address
-    draw2.text((x, top + 12),  line2part1, font=font, fill=255) # load
-    draw2.text((x + 74, top + 12), line2part2, font=font, fill=255) # sys temp
-    draw2.text((x, top + 24), line3, font=font, fill=255) # Memory
-    draw2.text((x, top + 36), line4, font=font, fill=255) # Disk
-    draw2.text((x, top + 48), line5, font=font, fill=255) # local time
-
-    # Display image. 
-    oled2.image(image2)
-    oled2.show()  
-    #----------------------
+    mode_stats()
 
     time.sleep(0.1)
 
