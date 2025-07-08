@@ -29,12 +29,13 @@ faceSleepy = "Bunz_Sleepy_64x64.bmp"
 faceDead = "Bunz_Dead_64x64.bmp"
 faceIdleLeft = "Bunz_Idle_Left_64x64.bmp"
 faceIdleRight = "Bunz_Idle_Right_64x64.bmp"
+faceSniffing = "Bunz_Sniffing_64x64.bmp"
 
 lastFace = faceDetermined # startup default face
 face = lastFace # Look at me initializing my vars!
 faceSpeedSetting = 2 # How long idle faces get held. Must be an int, default is 2
 faceSpeed = faceSpeedSetting # I really need to make this loop a function
-faceArray = [lastFace,faceIdleLeft,faceIdleRight] # Contains the array for idle animations
+faceArray = [lastFace,faceIdleLeft,faceIdleRight,faceHappy] # Contains the array for idle animations
 
 batt = 0
 batt_remaining = 0
@@ -204,13 +205,16 @@ while True:
     # Idle DoomBun face:
     if faceSpeed == 0:
         faceSpeed = faceSpeedSetting
-        idleFace = random.choices(faceArray, weights=[8,2,2], k=1)
+        idleFace = random.choices(faceArray, weights=[8,2,2,1], k=1)
         if idleFace[0] != "lastFace":
             face = idleFace[0]
         else:
             face = lastFace
     else:
         faceSpeed = faceSpeed - 1
+
+    if batt_remaining < 15:
+        face = faceSleepy
 
     # Draw the cutie lil' bun face
     image1.paste(Image.open(imagePath+face), (0,0))
