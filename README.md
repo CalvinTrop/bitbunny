@@ -29,9 +29,10 @@ ToDo: Finish this README, I'm tired and need a drink.
   - python3-setuptools
   - pip
   - [pillow](https://pillow.readthedocs.io/en/stable/)
-  - Adafruit-circuitpython-ssd1306 lib
-  - Adafruit-ina-260 lib
-  - Adafruit-Blinka lib
+  - Adafruit-circuitpython-ssd1306
+  - Adafruit-ina-260
+  - Adafruit-Blinka
+  - Adafruit-circuitpython-seesaw
 
 ### Pinouts:
   - OLED Displays:
