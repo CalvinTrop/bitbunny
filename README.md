@@ -33,6 +33,7 @@ ToDo: Finish this README, I'm tired and need a drink.
   - Adafruit-ina-260
   - Adafruit-Blinka
   - Adafruit-circuitpython-seesaw
+  - adafruit-circuitpython-neokey
 
 ### Pinouts:
   - OLED Displays:
